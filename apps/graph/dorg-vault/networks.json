@@ -1,0 +1,8 @@
+{
+  "optimism-sepolia": {
+    "BasicERC4626Vault": {
+      "address": "0x6aA4C7396579cE2666F38acB9dfB84BD373e4CB9",
+      "startBlock": 26544587
+    }
+  }
+}

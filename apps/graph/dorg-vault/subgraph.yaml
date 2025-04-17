@@ -1,0 +1,35 @@
+specVersion: 1.3.0
+indexerHints:
+  prune: auto
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: BasicERC4626Vault
+    network: optimism-sepolia
+    source:
+      address: "0x6aA4C7396579cE2666F38acB9dfB84BD373e4CB9"
+      abi: BasicERC4626Vault
+      startBlock: 26544587
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities:
+        - Approval
+        - Deposit
+        - Transfer
+        - Withdraw
+      abis:
+        - name: BasicERC4626Vault
+          file: ./abis/BasicERC4626Vault.json
+      eventHandlers:
+        - event: Approval(indexed address,indexed address,uint256)
+          handler: handleApproval
+        - event: Deposit(indexed address,indexed address,uint256,uint256)
+          handler: handleDeposit
+        - event: Transfer(indexed address,indexed address,uint256)
+          handler: handleTransfer
+        - event: Withdraw(indexed address,indexed address,indexed address,uint256,uint256)
+          handler: handleWithdraw
+      file: ./src/basic-erc-4626-vault.ts
