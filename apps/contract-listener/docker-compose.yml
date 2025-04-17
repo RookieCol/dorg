@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: ../../
+      dockerfile: ./apps/contract-listener/Dockerfile
+      target: development
+    container_name: dorg-contract-listener
+    ports:
+      - '3000:3000'
+    environment:
+      - NODE_ENV=development
+      - DATABASE_HOST=dorg-postgres
+      - DATABASE_PORT=5432
+      - DATABASE_USER=postgres
+      - DATABASE_PASSWORD=postgres
+      - DATABASE_NAME=dorg
+    volumes:
+      - ./:/app/apps/contract-listener
+      - /app/apps/contract-listener/node_modules
+    depends_on:
+      - postgres
+    networks:
+      - dorg-network
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: dorg-postgres
+    ports:
+      - '5433:5432'
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=dorg
+    volumes:
+      - dorg-postgres-data:/var/lib/postgresql/data
+    networks:
+      - dorg-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+networks:
+  dorg-network:
+    driver: bridge
+
+volumes:
+  dorg-postgres-data: 
