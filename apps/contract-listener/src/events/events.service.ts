@@ -4,7 +4,12 @@ import { Repository } from 'typeorm';
 import { DepositEvent } from './entities/deposit.entity';
 import { WithdrawEvent } from './entities/withdraw.entity';
 import { DepositEventDto, WithdrawEventDto } from './dto/wallet-events.dto';
-import { VaultDepositDto, VaultWithdrawDto } from './dto/vault-state.dto';
+import {
+  VaultDepositDto,
+  VaultWithdrawDto,
+  DepositRecordDto,
+  WithdrawRecordDto,
+} from './dto/vault.dto';
 
 @Injectable()
 export class EventsService {
@@ -181,6 +186,57 @@ export class EventsService {
     } catch (error) {
       this.logger.error(
         `Error finding withdrawals for wallet ${wallet}: ${
+          error instanceof Error ? error.message : 'Unknown error'
+        }`,
+      );
+      throw error;
+    }
+  }
+
+  async getDepositRecords(wallet: string): Promise<DepositRecordDto[]> {
+    try {
+      const deposits = await this.depositRepo.find({
+        where: { receiver: wallet },
+        order: { block: 'DESC' },
+      });
+
+      return deposits.map((deposit) => ({
+        caller: deposit.caller,
+        receiver: deposit.receiver,
+        assets: deposit.assets,
+        shares: deposit.shares,
+        block: deposit.block,
+        timestamp: deposit.createdAt,
+      }));
+    } catch (error) {
+      this.logger.error(
+        `Error getting deposit records for wallet ${wallet}: ${
+          error instanceof Error ? error.message : 'Unknown error'
+        }`,
+      );
+      throw error;
+    }
+  }
+
+  async getWithdrawRecords(wallet: string): Promise<WithdrawRecordDto[]> {
+    try {
+      const withdrawals = await this.withdrawRepo.find({
+        where: { owner: wallet },
+        order: { block: 'DESC' },
+      });
+
+      return withdrawals.map((withdrawal) => ({
+        caller: withdrawal.caller,
+        receiver: withdrawal.receiver,
+        owner: withdrawal.owner,
+        assets: withdrawal.assets,
+        shares: withdrawal.shares,
+        block: withdrawal.block,
+        timestamp: withdrawal.createdAt,
+      }));
+    } catch (error) {
+      this.logger.error(
+        `Error getting withdrawal records for wallet ${wallet}: ${
           error instanceof Error ? error.message : 'Unknown error'
         }`,
       );
